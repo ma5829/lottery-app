@@ -114,6 +114,31 @@
             color: #d32f2f;
         }
 
+        .rule-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .rule-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .rule-box p {
+            color: #856404;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 5px;
+        }
+
+        .rule-box strong {
+            color: #d32f2f;
+        }
+
         .button-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -264,7 +289,17 @@
         .remaining-count {
             font-size: 14px;
             color: #666;
+            margin-bottom: 10px;
+        }
+
+        .next-team-indicator {
+            font-size: 13px;
+            color: #667eea;
+            font-weight: bold;
             margin-bottom: 15px;
+            padding: 5px;
+            background: #f0f3ff;
+            border-radius: 5px;
         }
 
         .result-display {
@@ -424,6 +459,32 @@
             color: #333;
         }
 
+        .member-info {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .member-pot {
+            font-size: 0.8em;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .member-pot.from-pot1 {
+            background: #e74c3c;
+        }
+
+        .member-pot.from-pot2 {
+            background: #3498db;
+        }
+
+        .member-pot.from-pot3 {
+            background: #2ecc71;
+        }
+
         .member-order {
             font-size: 0.85em;
             color: #999;
@@ -576,6 +637,16 @@
         <div class="setup-section" id="setupSection" style="display: none;">
             <h2>人物名の登録</h2>
             
+            <!-- 振り分けルールの説明 -->
+            <div class="rule-box">
+                <h3>📋 チーム振り分けルール</h3>
+                <p>各POTで抽選するたびに、<strong>チーム1→2→3→1→2→3...</strong>の順番で振り分けられます。</p>
+                <p><strong>例:</strong></p>
+                <p>• POT1: 1回目→チーム1、2回目→チーム2、3回目→チーム3、4回目→チーム1...</p>
+                <p>• POT1がチーム2で終了 → POT2の1回目は<strong>チーム3から開始</strong></p>
+                <p>• POT2がチーム3で終了 → POT3の1回目は<strong>チーム1から開始</strong></p>
+            </div>
+
             <!-- GitHub使用方法の説明 -->
             <div class="info-box">
                 <h3>📖 GitHub連携の使い方</h3>
@@ -626,6 +697,7 @@
                             <div class="pot-title">POT 1</div>
                             <div class="pot-image">🏺</div>
                             <div class="remaining-count" id="pot1Count">残り: 0名</div>
+                            <div class="next-team-indicator" id="pot1NextTeam">次: チーム1</div>
                             <div class="result-display" id="pot1Result">結果表示</div>
                             <button class="draw-button" id="pot1Button" onclick="draw(1)">抽選</button>
                         </div>
@@ -635,6 +707,7 @@
                             <div class="pot-title">POT 2</div>
                             <div class="pot-image">🏺</div>
                             <div class="remaining-count" id="pot2Count">残り: 0名</div>
+                            <div class="next-team-indicator" id="pot2NextTeam">次: チーム1</div>
                             <div class="result-display" id="pot2Result">結果表示</div>
                             <button class="draw-button" id="pot2Button" onclick="draw(2)">抽選</button>
                         </div>
@@ -644,6 +717,7 @@
                             <div class="pot-title">POT 3</div>
                             <div class="pot-image">🏺</div>
                             <div class="remaining-count" id="pot3Count">残り: 0名</div>
+                            <div class="next-team-indicator" id="pot3NextTeam">次: チーム1</div>
                             <div class="result-display" id="pot3Result">結果表示</div>
                             <button class="draw-button" id="pot3Button" onclick="draw(3)">抽選</button>
                         </div>
@@ -728,6 +802,13 @@
         };
 
         let drawOrder = 0; // 全体の抽選順序
+
+        // 各POTの次の振り分けチーム番号（1-3）
+        let nextTeamForPot = {
+            1: 1,
+            2: 1,
+            3: 1
+        };
 
         // 通知表示
         function showNotification(message, type = 'success') {
@@ -845,6 +926,7 @@
             history = [];
             teams = { 1: [], 2: [], 3: [] };
             drawOrder = 0;
+            nextTeamForPot = { 1: 1, 2: 1, 3: 1 };
 
             // 画面切り替え
             document.getElementById('setupSection').style.display = 'none';
@@ -854,6 +936,7 @@
             updateAllCounts();
             updateAllButtons();
             updateAllTeams();
+            updateAllNextTeamIndicators();
         }
 
         // 抽選実行
@@ -870,6 +953,9 @@
             potIndex[potNumber]++;
             drawOrder++;
 
+            // このPOTの現在の振り分け先チーム
+            const assignedTeam = nextTeamForPot[potNumber];
+
             // 結果を表示
             const resultElement = document.getElementById(`pot${potNumber}Result`);
             resultElement.textContent = selectedName;
@@ -882,10 +968,11 @@
                 resultElement.classList.add('has-result');
             }, 10);
 
-            // チームに追加（POT番号に対応するチーム番号に追加）
-            teams[potNumber].push({
+            // チームに追加
+            teams[assignedTeam].push({
                 name: selectedName,
-                order: drawOrder
+                order: drawOrder,
+                fromPot: potNumber
             });
 
             // 履歴に追加
@@ -893,15 +980,34 @@
             const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
             history.unshift({
                 pot: potNumber,
-                team: potNumber,
+                team: assignedTeam,
                 name: selectedName,
                 time: timeString
             });
 
+            // 次回の振り分け先を更新（1→2→3→1...の循環）
+            nextTeamForPot[potNumber] = (assignedTeam % 3) + 1;
+
+            // POTが終了した場合、次のPOTに引き継ぐ
+            if (potIndex[potNumber] >= data.length) {
+                // このPOTが終了
+                const lastAssignedTeam = assignedTeam;
+                const nextTeam = (lastAssignedTeam % 3) + 1;
+                
+                // 次のPOT番号を計算
+                const nextPotNumber = (potNumber % 3) + 1;
+                
+                // もし次のPOTがまだ始まっていない場合のみ引き継ぐ
+                if (potIndex[nextPotNumber] === 0) {
+                    nextTeamForPot[nextPotNumber] = nextTeam;
+                }
+            }
+
             updateHistory();
             updateCount(potNumber);
             updateButton(potNumber);
-            updateTeam(potNumber);
+            updateTeam(assignedTeam);
+            updateNextTeamIndicator(potNumber);
         }
 
         // カウント更新
@@ -933,6 +1039,27 @@
             }
         }
 
+        // 次のチーム表示を更新
+        function updateNextTeamIndicator(potNumber) {
+            const nextTeam = nextTeamForPot[potNumber];
+            const indicator = document.getElementById(`pot${potNumber}NextTeam`);
+            
+            // まだ引ける場合のみ表示
+            const remaining = potData[potNumber].length - potIndex[potNumber];
+            if (remaining > 0) {
+                indicator.textContent = `次: チーム${nextTeam}`;
+                indicator.style.display = 'block';
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        function updateAllNextTeamIndicators() {
+            for (let i = 1; i <= 3; i++) {
+                updateNextTeamIndicator(i);
+            }
+        }
+
         // チーム表示更新
         function updateTeam(teamNumber) {
             const teamMembers = teams[teamNumber];
@@ -949,7 +1076,10 @@
                 teamMembersElement.innerHTML = teamMembers.map(member => `
                     <div class="team-member">
                         <span class="member-name">${member.name}</span>
-                        <span class="member-order">#${member.order}</span>
+                        <div class="member-info">
+                            <span class="member-pot from-pot${member.fromPot}">POT${member.fromPot}</span>
+                            <span class="member-order">#${member.order}</span>
+                        </div>
                     </div>
                 `).join('');
             }
@@ -1000,6 +1130,7 @@
             // チームをリセット
             teams = { 1: [], 2: [], 3: [] };
             drawOrder = 0;
+            nextTeamForPot = { 1: 1, 2: 1, 3: 1 };
             updateAllTeams();
         }
 
