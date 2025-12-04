@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -184,17 +184,23 @@
             display: block;
         }
 
-        .pots-container {
+        .main-content {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: 2fr 1fr;
             gap: 30px;
             margin-bottom: 30px;
+        }
+
+        .pots-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
         }
 
         .pot-card {
             background: white;
             border-radius: 15px;
-            padding: 30px;
+            padding: 25px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
@@ -212,7 +218,7 @@
         }
 
         .pot-title {
-            font-size: 1.5em;
+            font-size: 1.3em;
             font-weight: bold;
             margin-bottom: 15px;
         }
@@ -230,14 +236,14 @@
         }
 
         .pot-image {
-            width: 150px;
-            height: 150px;
-            margin: 20px auto;
+            width: 120px;
+            height: 120px;
+            margin: 15px auto;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 60px;
+            font-size: 50px;
         }
 
         .pot-card.pot1 .pot-image {
@@ -262,12 +268,12 @@
         }
 
         .result-display {
-            min-height: 60px;
+            min-height: 50px;
             background: #f8f9fa;
             border-radius: 10px;
-            padding: 15px;
-            margin: 20px 0;
-            font-size: 24px;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 20px;
             font-weight: bold;
             color: #333;
             display: flex;
@@ -298,12 +304,12 @@
 
         .draw-button {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
@@ -322,6 +328,115 @@
             background: #95a5a6;
             cursor: not-allowed;
             opacity: 0.6;
+        }
+
+        /* チーム編成エリア */
+        .teams-area {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .teams-area h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            text-align: center;
+        }
+
+        .team-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            min-height: 100px;
+        }
+
+        .team-card.team1 {
+            border-left: 5px solid #e74c3c;
+        }
+
+        .team-card.team2 {
+            border-left: 5px solid #3498db;
+        }
+
+        .team-card.team3 {
+            border-left: 5px solid #2ecc71;
+        }
+
+        .team-header {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .team-card.team1 .team-header {
+            color: #e74c3c;
+        }
+
+        .team-card.team2 .team-header {
+            color: #3498db;
+        }
+
+        .team-card.team3 .team-header {
+            color: #2ecc71;
+        }
+
+        .team-count {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .team-members {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .team-member {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            animation: slideInMember 0.3s ease-out;
+        }
+
+        @keyframes slideInMember {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .member-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .member-order {
+            font-size: 0.85em;
+            color: #999;
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 3px;
+        }
+
+        .team-empty {
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+            padding: 20px;
         }
 
         .reset-button {
@@ -427,13 +542,19 @@
             }
         }
 
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
             }
 
             .pots-container {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
             }
 
             .button-group {
@@ -496,32 +617,75 @@
 
         <!-- 抽選セクション -->
         <div class="lottery-section" id="lotterySection">
-            <div class="pots-container">
-                <!-- POT 1 -->
-                <div class="pot-card pot1">
-                    <div class="pot-title">POT 1</div>
-                    <div class="pot-image">🏺</div>
-                    <div class="remaining-count" id="pot1Count">残り: 0名</div>
-                    <div class="result-display" id="pot1Result">抽選結果がここに表示されます</div>
-                    <button class="draw-button" id="pot1Button" onclick="draw(1)">抽選</button>
+            <div class="main-content">
+                <!-- POTエリア -->
+                <div>
+                    <div class="pots-container">
+                        <!-- POT 1 -->
+                        <div class="pot-card pot1">
+                            <div class="pot-title">POT 1</div>
+                            <div class="pot-image">🏺</div>
+                            <div class="remaining-count" id="pot1Count">残り: 0名</div>
+                            <div class="result-display" id="pot1Result">結果表示</div>
+                            <button class="draw-button" id="pot1Button" onclick="draw(1)">抽選</button>
+                        </div>
+
+                        <!-- POT 2 -->
+                        <div class="pot-card pot2">
+                            <div class="pot-title">POT 2</div>
+                            <div class="pot-image">🏺</div>
+                            <div class="remaining-count" id="pot2Count">残り: 0名</div>
+                            <div class="result-display" id="pot2Result">結果表示</div>
+                            <button class="draw-button" id="pot2Button" onclick="draw(2)">抽選</button>
+                        </div>
+
+                        <!-- POT 3 -->
+                        <div class="pot-card pot3">
+                            <div class="pot-title">POT 3</div>
+                            <div class="pot-image">🏺</div>
+                            <div class="remaining-count" id="pot3Count">残り: 0名</div>
+                            <div class="result-display" id="pot3Result">結果表示</div>
+                            <button class="draw-button" id="pot3Button" onclick="draw(3)">抽選</button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- POT 2 -->
-                <div class="pot-card pot2">
-                    <div class="pot-title">POT 2</div>
-                    <div class="pot-image">🏺</div>
-                    <div class="remaining-count" id="pot2Count">残り: 0名</div>
-                    <div class="result-display" id="pot2Result">抽選結果がここに表示されます</div>
-                    <button class="draw-button" id="pot2Button" onclick="draw(2)">抽選</button>
-                </div>
+                <!-- チーム編成エリア -->
+                <div class="teams-area">
+                    <h2>👥 チーム編成</h2>
+                    
+                    <!-- チーム1 -->
+                    <div class="team-card team1">
+                        <div class="team-header">
+                            <span>チーム 1</span>
+                            <span class="team-count" id="team1Count">0名</span>
+                        </div>
+                        <div class="team-members" id="team1Members">
+                            <div class="team-empty">まだメンバーがいません</div>
+                        </div>
+                    </div>
 
-                <!-- POT 3 -->
-                <div class="pot-card pot3">
-                    <div class="pot-title">POT 3</div>
-                    <div class="pot-image">🏺</div>
-                    <div class="remaining-count" id="pot3Count">残り: 0名</div>
-                    <div class="result-display" id="pot3Result">抽選結果がここに表示されます</div>
-                    <button class="draw-button" id="pot3Button" onclick="draw(3)">抽選</button>
+                    <!-- チーム2 -->
+                    <div class="team-card team2">
+                        <div class="team-header">
+                            <span>チーム 2</span>
+                            <span class="team-count" id="team2Count">0名</span>
+                        </div>
+                        <div class="team-members" id="team2Members">
+                            <div class="team-empty">まだメンバーがいません</div>
+                        </div>
+                    </div>
+
+                    <!-- チーム3 -->
+                    <div class="team-card team3">
+                        <div class="team-header">
+                            <span>チーム 3</span>
+                            <span class="team-count" id="team3Count">0名</span>
+                        </div>
+                        <div class="team-members" id="team3Members">
+                            <div class="team-empty">まだメンバーがいません</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -555,6 +719,15 @@
         };
 
         let history = [];
+
+        // チーム編成データ
+        let teams = {
+            1: [],
+            2: [],
+            3: []
+        };
+
+        let drawOrder = 0; // 全体の抽選順序
 
         // 通知表示
         function showNotification(message, type = 'success') {
@@ -670,6 +843,8 @@
             // インデックスをリセット
             potIndex = { 1: 0, 2: 0, 3: 0 };
             history = [];
+            teams = { 1: [], 2: [], 3: [] };
+            drawOrder = 0;
 
             // 画面切り替え
             document.getElementById('setupSection').style.display = 'none';
@@ -678,6 +853,7 @@
             // カウント表示の更新
             updateAllCounts();
             updateAllButtons();
+            updateAllTeams();
         }
 
         // 抽選実行
@@ -692,6 +868,7 @@
             // 登録順に取得
             const selectedName = data[currentIndex];
             potIndex[potNumber]++;
+            drawOrder++;
 
             // 結果を表示
             const resultElement = document.getElementById(`pot${potNumber}Result`);
@@ -705,11 +882,18 @@
                 resultElement.classList.add('has-result');
             }, 10);
 
+            // チームに追加（POT番号に対応するチーム番号に追加）
+            teams[potNumber].push({
+                name: selectedName,
+                order: drawOrder
+            });
+
             // 履歴に追加
             const now = new Date();
             const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
             history.unshift({
                 pot: potNumber,
+                team: potNumber,
                 name: selectedName,
                 time: timeString
             });
@@ -717,6 +901,7 @@
             updateHistory();
             updateCount(potNumber);
             updateButton(potNumber);
+            updateTeam(potNumber);
         }
 
         // カウント更新
@@ -748,6 +933,34 @@
             }
         }
 
+        // チーム表示更新
+        function updateTeam(teamNumber) {
+            const teamMembers = teams[teamNumber];
+            const teamMembersElement = document.getElementById(`team${teamNumber}Members`);
+            const teamCountElement = document.getElementById(`team${teamNumber}Count`);
+
+            // カウント更新
+            teamCountElement.textContent = `${teamMembers.length}名`;
+
+            // メンバー表示
+            if (teamMembers.length === 0) {
+                teamMembersElement.innerHTML = '<div class="team-empty">まだメンバーがいません</div>';
+            } else {
+                teamMembersElement.innerHTML = teamMembers.map(member => `
+                    <div class="team-member">
+                        <span class="member-name">${member.name}</span>
+                        <span class="member-order">#${member.order}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateAllTeams() {
+            for (let i = 1; i <= 3; i++) {
+                updateTeam(i);
+            }
+        }
+
         // 履歴更新
         function updateHistory() {
             const historyList = document.getElementById('historyList');
@@ -760,7 +973,7 @@
             historyList.innerHTML = history.map(item => `
                 <div class="history-item">
                     <span class="history-pot pot${item.pot}">POT ${item.pot}</span>
-                    <span>${item.name}</span>
+                    <span>${item.name} → チーム${item.team}</span>
                     <span style="color: #999; font-size: 12px;">${item.time}</span>
                 </div>
             `).join('');
@@ -778,11 +991,16 @@
 
             // 結果表示をクリア
             for (let i = 1; i <= 3; i++) {
-                document.getElementById(`pot${i}Result`).textContent = '抽選結果がここに表示されます';
+                document.getElementById(`pot${i}Result`).textContent = '結果表示';
                 document.getElementById(`pot${i}Result`).classList.remove('has-result');
                 document.getElementById(`pot${i}Button`).disabled = false;
                 document.getElementById(`pot${i}Button`).textContent = '抽選';
             }
+
+            // チームをリセット
+            teams = { 1: [], 2: [], 3: [] };
+            drawOrder = 0;
+            updateAllTeams();
         }
 
         // ページ読み込み時にデータを自動読み込み
