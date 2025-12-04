@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽選アプリ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Hiragino Sans', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+            padding: 50px;
+        }
+
+        .setup-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .setup-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .input-group textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .info-box p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-box code {
+            background: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #d32f2f;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .export-button {
+            padding: 12px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .export-button:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .reload-button {
+            padding: 12px;
+            background: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reload-button:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .start-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .start-button:active {
+            transform: translateY(0);
+        }
+
+        .lottery-section {
+            display: none;
+        }
+
+        .lottery-section.active {
+            display: block;
+        }
+
+        .pots-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .pot-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .pot-card.pot1 {
+            border-top: 5px solid #e74c3c;
+        }
+
+        .pot-card.pot2 {
+            border-top: 5px solid #3498db;
+        }
+
+        .pot-card.pot3 {
+            border-top: 5px solid #2ecc71;
+        }
+
+        .pot-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .pot-card.pot1 .pot-title {
+            color: #e74c3c;
+        }
+
+        .pot-card.pot2 .pot-title {
+            color: #3498db;
+        }
+
+        .pot-card.pot3 .pot-title {
+            color: #2ecc71;
+        }
+
+        .pot-image {
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+
+        .pot-card.pot1 .pot-image {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .pot-card.pot2 .pot-image {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .pot-card.pot3 .pot-image {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .remaining-count {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .result-display {
+            min-height: 60px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ddd;
+        }
+
+        .result-display.has-result {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border: 2px solid #fdcb6e;
+            animation: popIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .draw-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .draw-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .draw-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .draw-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .reset-button {
+            display: block;
+            margin: 30px auto;
+            padding: 15px 40px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reset-button:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .history-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .history-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-pot {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .history-pot.pot1 {
+            background: #e74c3c;
+        }
+
+        .history-pot.pot2 {
+            background: #3498db;
+        }
+
+        .history-pot.pot3 {
+            background: #2ecc71;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification.success {
+            border-left: 5px solid #2ecc71;
+        }
+
+        .notification.error {
+            border-left: 5px solid #e74c3c;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .pots-container {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 抽選アプリ</h1>
+
+        <!-- ローディング -->
+        <div class="loading" id="loading">
+            データを読み込んでいます...
+        </div>
+
+        <!-- 設定セクション -->
+        <div class="setup-section" id="setupSection" style="display: none;">
+            <h2>人物名の登録</h2>
+            
+            <!-- GitHub使用方法の説明 -->
+            <div class="info-box">
+                <h3>📖 GitHub連携の使い方</h3>
+                <p><strong>PCでの編集:</strong></p>
+                <p>1. 下記のフォームで人物名を編集</p>
+                <p>2. 「data.jsonをダウンロード」ボタンをクリック</p>
+                <p>3. ダウンロードした<code>data.json</code>をGitHubリポジトリにプッシュ</p>
+                <p><strong>スマホでの使用:</strong></p>
+                <p>1. GitHub PagesのURLにアクセス</p>
+                <p>2. 自動的に最新のdata.jsonが読み込まれます</p>
+                <p>3. そのまま「抽選を開始」をタップ</p>
+            </div>
+
+            <div class="button-group">
+                <button class="export-button" onclick="exportDataJson()">📥 data.json をダウンロード</button>
+                <button class="reload-button" onclick="reloadData()">🔄 data.json を再読み込み</button>
+            </div>
+
+            <div class="input-group">
+                <label for="pot1Input">POT 1 (赤)</label>
+                <textarea id="pot1Input" placeholder="人物名を1行に1名ずつ入力してください&#10;例:&#10;山田太郎&#10;鈴木花子&#10;佐藤次郎"></textarea>
+                <div class="hint">1行に1名ずつ入力してください</div>
+            </div>
+
+            <div class="input-group">
+                <label for="pot2Input">POT 2 (青)</label>
+                <textarea id="pot2Input" placeholder="人物名を1行に1名ずつ入力してください&#10;例:&#10;田中一郎&#10;高橋美咲&#10;伊藤健太"></textarea>
+                <div class="hint">1行に1名ずつ入力してください</div>
+            </div>
+
+            <div class="input-group">
+                <label for="pot3Input">POT 3 (緑)</label>
+                <textarea id="pot3Input" placeholder="人物名を1行に1名ずつ入力してください&#10;例:&#10;渡辺さくら&#10;中村大輔&#10;小林愛"></textarea>
+                <div class="hint">1行に1名ずつ入力してください</div>
+            </div>
+
+            <button class="start-button" onclick="startLottery()">抽選を開始</button>
+        </div>
+
+        <!-- 抽選セクション -->
+        <div class="lottery-section" id="lotterySection">
+            <div class="pots-container">
+                <!-- POT 1 -->
+                <div class="pot-card pot1">
+                    <div class="pot-title">POT 1</div>
+                    <div class="pot-image">🏺</div>
+                    <div class="remaining-count" id="pot1Count">残り: 0名</div>
+                    <div class="result-display" id="pot1Result">抽選結果がここに表示されます</div>
+                    <button class="draw-button" id="pot1Button" onclick="draw(1)">抽選</button>
+                </div>
+
+                <!-- POT 2 -->
+                <div class="pot-card pot2">
+                    <div class="pot-title">POT 2</div>
+                    <div class="pot-image">🏺</div>
+                    <div class="remaining-count" id="pot2Count">残り: 0名</div>
+                    <div class="result-display" id="pot2Result">抽選結果がここに表示されます</div>
+                    <button class="draw-button" id="pot2Button" onclick="draw(2)">抽選</button>
+                </div>
+
+                <!-- POT 3 -->
+                <div class="pot-card pot3">
+                    <div class="pot-title">POT 3</div>
+                    <div class="pot-image">🏺</div>
+                    <div class="remaining-count" id="pot3Count">残り: 0名</div>
+                    <div class="result-display" id="pot3Result">抽選結果がここに表示されます</div>
+                    <button class="draw-button" id="pot3Button" onclick="draw(3)">抽選</button>
+                </div>
+            </div>
+
+            <button class="reset-button" onclick="resetLottery()">リセット</button>
+
+            <!-- 履歴セクション -->
+            <div class="history-section">
+                <h2>抽選履歴</h2>
+                <div class="history-list" id="historyList">
+                    <p style="text-align: center; color: #999;">まだ抽選が行われていません</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知 -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // データ保存用
+        let potData = {
+            1: [],
+            2: [],
+            3: []
+        };
+
+        let potIndex = {
+            1: 0,
+            2: 0,
+            3: 0
+        };
+
+        let history = [];
+
+        // 通知表示
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 初期データ読み込み
+        async function loadData() {
+            try {
+                // data.jsonを読み込み(キャッシュ回避のためタイムスタンプを追加)
+                const response = await fetch(`data.json?t=${Date.now()}`);
+                
+                if (!response.ok) {
+                    throw new Error('data.jsonが見つかりません');
+                }
+                
+                const data = await response.json();
+                
+                // データの検証
+                if (!data.pots || !data.pots[1] || !data.pots[2] || !data.pots[3]) {
+                    throw new Error('無効なデータ形式です');
+                }
+
+                // データを入力欄に反映
+                document.getElementById('pot1Input').value = data.pots[1].join('\n');
+                document.getElementById('pot2Input').value = data.pots[2].join('\n');
+                document.getElementById('pot3Input').value = data.pots[3].join('\n');
+
+                // ローディングを非表示、設定画面を表示
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('setupSection').style.display = 'block';
+                
+                showNotification('データを読み込みました', 'success');
+            } catch (error) {
+                console.error('Load error:', error);
+                // data.jsonが無い場合は空のフォームを表示
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('setupSection').style.display = 'block';
+                showNotification('data.jsonが見つかりません。新規作成してください。', 'error');
+            }
+        }
+
+        // data.jsonの再読み込み
+        async function reloadData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('setupSection').style.display = 'none';
+            await loadData();
+        }
+
+        // data.jsonのエクスポート
+        function exportDataJson() {
+            // 入力データの取得
+            const pot1Input = document.getElementById('pot1Input').value;
+            const pot2Input = document.getElementById('pot2Input').value;
+            const pot3Input = document.getElementById('pot3Input').value;
+
+            // 空行を除外して配列に変換
+            const pot1Data = pot1Input.split('\n').filter(name => name.trim() !== '');
+            const pot2Data = pot2Input.split('\n').filter(name => name.trim() !== '');
+            const pot3Data = pot3Input.split('\n').filter(name => name.trim() !== '');
+
+            // エクスポートデータの作成
+            const exportData = {
+                version: '1.0',
+                lastUpdated: new Date().toISOString(),
+                pots: {
+                    1: pot1Data,
+                    2: pot2Data,
+                    3: pot3Data
+                }
+            };
+
+            // JSONファイルとしてダウンロード
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'data.json';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showNotification('data.jsonをダウンロードしました!', 'success');
+        }
+
+        // 抽選開始
+        function startLottery() {
+            // 入力データの取得と処理
+            const pot1Input = document.getElementById('pot1Input').value;
+            const pot2Input = document.getElementById('pot2Input').value;
+            const pot3Input = document.getElementById('pot3Input').value;
+
+            // 空行を除外して配列に変換
+            potData[1] = pot1Input.split('\n').filter(name => name.trim() !== '');
+            potData[2] = pot2Input.split('\n').filter(name => name.trim() !== '');
+            potData[3] = pot3Input.split('\n').filter(name => name.trim() !== '');
+
+            // 最低1つのPOTにデータが必要
+            if (potData[1].length === 0 && potData[2].length === 0 && potData[3].length === 0) {
+                showNotification('少なくとも1つのPOTに人物名を入力してください', 'error');
+                return;
+            }
+
+            // インデックスをリセット
+            potIndex = { 1: 0, 2: 0, 3: 0 };
+            history = [];
+
+            // 画面切り替え
+            document.getElementById('setupSection').style.display = 'none';
+            document.getElementById('lotterySection').classList.add('active');
+
+            // カウント表示の更新
+            updateAllCounts();
+            updateAllButtons();
+        }
+
+        // 抽選実行
+        function draw(potNumber) {
+            const data = potData[potNumber];
+            const currentIndex = potIndex[potNumber];
+
+            if (currentIndex >= data.length) {
+                return; // もう引けない
+            }
+
+            // 登録順に取得
+            const selectedName = data[currentIndex];
+            potIndex[potNumber]++;
+
+            // 結果を表示
+            const resultElement = document.getElementById(`pot${potNumber}Result`);
+            resultElement.textContent = selectedName;
+            resultElement.classList.add('has-result');
+
+            // アニメーションをリセットするため一度クラスを削除して再追加
+            setTimeout(() => {
+                resultElement.classList.remove('has-result');
+                void resultElement.offsetWidth; // reflow
+                resultElement.classList.add('has-result');
+            }, 10);
+
+            // 履歴に追加
+            const now = new Date();
+            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            history.unshift({
+                pot: potNumber,
+                name: selectedName,
+                time: timeString
+            });
+
+            updateHistory();
+            updateCount(potNumber);
+            updateButton(potNumber);
+        }
+
+        // カウント更新
+        function updateCount(potNumber) {
+            const remaining = potData[potNumber].length - potIndex[potNumber];
+            document.getElementById(`pot${potNumber}Count`).textContent = `残り: ${remaining}名`;
+        }
+
+        function updateAllCounts() {
+            for (let i = 1; i <= 3; i++) {
+                updateCount(i);
+            }
+        }
+
+        // ボタン状態更新
+        function updateButton(potNumber) {
+            const button = document.getElementById(`pot${potNumber}Button`);
+            const remaining = potData[potNumber].length - potIndex[potNumber];
+            
+            if (remaining === 0) {
+                button.disabled = true;
+                button.textContent = '終了';
+            }
+        }
+
+        function updateAllButtons() {
+            for (let i = 1; i <= 3; i++) {
+                updateButton(i);
+            }
+        }
+
+        // 履歴更新
+        function updateHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<p style="text-align: center; color: #999;">まだ抽選が行われていません</p>';
+                return;
+            }
+
+            historyList.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <span class="history-pot pot${item.pot}">POT ${item.pot}</span>
+                    <span>${item.name}</span>
+                    <span style="color: #999; font-size: 12px;">${item.time}</span>
+                </div>
+            `).join('');
+        }
+
+        // リセット
+        function resetLottery() {
+            if (!confirm('リセットしてよろしいですか?')) {
+                return;
+            }
+
+            // 設定画面に戻る
+            document.getElementById('setupSection').style.display = 'block';
+            document.getElementById('lotterySection').classList.remove('active');
+
+            // 結果表示をクリア
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`pot${i}Result`).textContent = '抽選結果がここに表示されます';
+                document.getElementById(`pot${i}Result`).classList.remove('has-result');
+                document.getElementById(`pot${i}Button`).disabled = false;
+                document.getElementById(`pot${i}Button`).textContent = '抽選';
+            }
+        }
+
+        // ページ読み込み時にデータを自動読み込み
+        window.addEventListener('load', loadData);
+    </script>
+</body>
+</html>
